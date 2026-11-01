@@ -10,25 +10,12 @@ param(
 $taskFile = "projects/$Project/tasks/$($Title -replace ' ','_')-$(Get-Date -Format 'yyyyMMdd').md"
 
 if ($Action -eq "create") {
-    $content = @"---
-tipo: tarefa
-criado: $(Get-Date -Format 'yyyy-MM-dd')
-atualizado: $(Get-Date -Format 'yyyy-MM-dd')
-status: $Status
-tags: [$Project, $Priority]
----
-# $Title
-- **Projeto:** $Project
-- **Prioridade:** $Priority
-- **Status:** $Status
-## Próximos passos
-- [ ] Definir objetivo
-- [ ] Executar
-- [ ] Validar
-"@
+    $dateStr = Get-Date -Format 'yyyy-MM-dd'
+    $fileName = ($Title -replace ' ','_') + "-" + (Get-Date -Format 'yyyyMMdd') + ".md"
+    $content = "---`ntipo: tarefa`ncriado: $dateStr`natualizado: $dateStr`nstatus: $Status`ntags: [$Project, $Priority]`n---`n# $Title`n- **Projeto:** $Project`n- **Prioridade:** $Priority`n- **Status:** $Status`n## Proximos passos`n- [ ] Definir objetivo`n- [ ] Executar`n- [ ] Validar`n"
     if (-not (Test-Path "projects/$Project/tasks")) { New-Item -ItemType Directory -Path "projects/$Project/tasks" -Force | Out-Null }
-    $content | Out-File -FilePath $taskFile -Encoding utf8
-    Write-Host "Tarefa criada: $taskFile"
+    $content | Out-File -FilePath "projects/$Project/tasks/$fileName" -Encoding utf8
+    Write-Host "Tarefa criada: projects/$Project/tasks/$fileName"
 } elseif ($Action -eq "list") {
     Get-ChildItem "projects/$Project/tasks" -Filter *.md -ErrorAction SilentlyContinue | ForEach-Object {
         $line = Get-Content $_.FullName -First 10
