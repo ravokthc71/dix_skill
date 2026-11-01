@@ -1,26 +1,92 @@
-# Skills - OpenCode no Windows
+# Skills - Exemplos Práticos de Uso do OpenCode no Windows
 
-Esta pasta concentra snippets e procedimentos práticos para utilizar o **OpenCode em ambientes Windows**.
+## Caminhos Padrão no Windows
 
-## Conteúdo sugerido
+| Local | Variável de Ambiente | Uso |
+|-------|---------------------|-----|
+| Perfil do usuário | `%USERPROFILE%` | Configurações do usuário |
+| Dados do aplicativo | `%APPDATA%` | Dados persistentes |
+| Cache local | `%LOCALAPPDATA%` | Cache e arquivos temporários |
+| Perfil do usuário + OpenCode | `%USERPROFILE%\.opencode\` | Configuração principal |
 
-| Arquivo | Descrição |
-|---------|-----------|
-| `setup.md` | Instalação e primeiros passos do OpenCode no Windows. |
-| `caminhos.md` | Caminhos padrão de configuração e cache no Windows. |
-| `controle-llm.md` | Como controlar o OpenCode via LLMs (prompts, contexto, automação). |
+## Exemplo de Script de Inicialização (PowerShell)
 
-## Caminhos relevantes no Windows
+```powershell
+# Inicializar o OpenCode no Windows
+$env:OPENROUTER_API_KEY = "sua_chave_aqui"
+$env:OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 
-* Configuração do usuário: `%USERPROFILE%\.opencode\`
-* Dados de aplicativo: `%APPDATA%\.opencode\`
-* Cache local: `%LOCALAPPDATA%\.opencode\`
-* Arquivos de histórico e contexto: variam conforme o provider configurado.
+# Iniciar OpenCode
+opencode
+```
 
-## Como utilizar
+## Exemplo de Uso com Provider Específico
 
-1. Copie o snippet desejado para o seu projeto.
-2. Adapte os caminhos absolutos para o seu usuário do Windows.
-3. Teste em ambiente de desenvolvimento antes de usar em produção.
+```powershell
+# Usar um modelo específico via OpenRouter
+opencode --model openai/gpt-4o-mini --prompt "Explique o que é OpenRouter"
+```
 
-> Mantenha esta pasta atualizada sempre que descobrir um novo atalho ou procedimento útil no Windows.
+## Exemplo de Configuração de Ambiente (Windows)
+
+```powershell
+# Adicionar ao registro ou ao perfil do PowerShell
+$env:OPENROUTER_API_KEY = "sk-or-v1-..."
+$env:OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+```
+
+## Exemplo de Integração com .env
+
+```env
+# .env
+OPENROUTER_API_KEY=sk-or-v1-...
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+OPENROUTER_MODEL=openai/gpt-4o-mini
+```
+
+## Exemplo de Script de Backup de Configuração
+
+```powershell
+# Backup das configurações do OpenCode
+$backupDir = "C:\Backups\opencode"
+New-Item -ItemType Directory -Force -Path $backupDir | Out-Null
+Copy-Item "$env:USERPROFILE\.opencode\*" "$backupDir" -Recurse -Force
+```
+
+## Exemplo de Uso com LLMs (Controle via Prompt)
+
+```powershell
+# Exemplo de prompt de sistema para OpenCode
+$systemPrompt = "Você é um desenvolvedor sênior especializado em TypeScript e React. Responda em português do Brasil."
+opencode --system-prompt $systemPrompt --model openai/gpt-4o-mini
+```
+
+## Exemplo de Rotina de Verificação de Status
+
+```powershell
+# Verificar se o OpenCode está instalado
+if (Get-Command opencode -ErrorAction SilentlyContinue) {
+    $version = opencode --version
+    Write-Host "OpenCode versão: $version"
+} else {
+    Write-Host "OpenCode não encontrado. Execute: npm install -g @opencode/cli"
+}
+```
+
+## Exemplo de Configuração de Proxy (se necessário)
+
+```powershell
+$env:HTTP_PROXY = "http://proxy.empresa.com:8080"
+$env:HTTPS_PROXY = "http://proxy.empresa.com:8080"
+$env:NO_PROXY = "localhost,127.0.0.1"
+```
+
+## Dicas de Uso no Windows
+
+1. **Use o PowerShell ISE ou VS Code** para scripts complexos.
+2. **Habilite a execução de scripts** se necessário: `Set-ExecutionPolicy RemoteSigned`.
+3. **Use variáveis de ambiente** para chaves de API, nunca hardcode.
+4. **Monitore o uso** em https://openrouter.ai/settings/usage regularmente.
+5. **Mantenha backups** das configurações periodicamente.
+
+> Consulte `instructions/setup-opencode-windows.md` para o guia completo de instalação.

@@ -1,20 +1,89 @@
-# Skills - Rotação de Modelos (LLM)
+# Exemplos de Rotação de Modelos
 
-Esta pasta contém estratégias e exemplos de como **rotacionar entre diferentes modelos** de linguagem de forma eficiente.
+## Exemplo 1: Rotação por Tipo de Tarefa (Manual)
 
-## Quando rotacionar
+```powershell
+# Definir função de escolha de modelo
+function Choose-Model($taskType) {
+    switch ($taskType) {
+        "simple" { return "meta-llama/llama-3.1-8b-instruct:free" }
+        "medium" { return "openai/gpt-4o-mini" }
+        "complex" { return "anthropic/claude-3.5-sonnet" }
+        default { return "openai/gpt-4o-mini" }
+    }
+}
 
-* Custo: alternar entre modelos gratuitos e pagos conforme o orçamento.
-* Qualidade: usar modelos mais capazes para tarefas complexas e modelos leves para tarefas simples.
-* Disponibilidade: fallback automático quando um provider estiver fora do ar.
-* Limites de tokens: mudar de modelo ao atingir o limite de contexto ou de uso.
-
-## Padrão sugerido
-
+# Uso
+$model = Choose-Model -taskType "complex"
+opencode --model $model --prompt "Projete uma arquitetura de microsserviços"
 ```
-Tarefa simples (resumo, formatação)  -> modelo free/leve
-Tarefa média (código, revisão)       -> modelo médio/balanceado
-Tarefa complexa (arquitetura, raciocínio) -> modelo mais capaz/pago
+
+## Exemplo 2: Rotação Automática por Orçamento
+
+```powershell
+# Verificar consumo diário
+$usage = Invoke-RestMethod -Uri "https://openrouter.ai/api/v1/usage" -Headers @{Authorization = "Bearer $env:OPENROUTER_API_KEY"}
+
+if ($usage.dailySpent -gt 5.00) {
+    $model = "meta-llama/llama-3.1-8b-instruct:free"  # Fallback para free
+} else {
+    $model = "openai/gpt-4o-mini"
+}
 ```
 
-> Adicione aqui scripts ou prompts que implementem a lógica de rotação automática.
+## Exemplo 3: Rotação por Disponibilidade (Fallback)
+
+```powershell
+# Lista de modelos de backup
+$models = @(
+    "openai/gpt-4o-mini",
+    "meta-llama/llama-3.1-8b-instruct:free",
+    "google/gemma-2-9b-it:free"
+)
+
+foreach ($m in $models) {
+    try {
+        $response = opencode --model $m --prompt "Teste" --max-tokens 10
+        if ($response) { break }  # Usar o primeiro que responder
+    } catch {
+        Write-Host "Modelo $m indisponível"
+    }
+}
+```
+
+## Exemplo 4: Rotação por Tamanho de Contexto
+
+```powershell
+# Escolher modelo com base no tamanho do contexto necessário
+$textLength = (Get-Content "arquivo_grande.md" -Raw).Length
+if ($textLength -gt 50000) {
+    $model = "anthropic/claude-3.5-sonnet"  # 200k contexto
+} elseif ($textLength -gt 10000) {
+    $model = "openai/gpt-4o-mini"  # 128k contexto
+} else {
+    $model = "meta-llama/llama-3.1-8b-instruct:free"  # Contexto menor
+}
+```
+
+## Exemplo 5: Rotação por Horário do Dia
+
+```powershell
+$hour = (Get-Date).Hour
+if ($hour -lt 9 -or $hour -gt 18) {
+    $model = "meta-llama/llama-3.1-8b-instruct:free"  # Fora do horário, usar free
+} else {
+    $model = "openai/gpt-4o-mini"  # Horário comercial, usar médio
+}
+```
+
+## Tabela de Rotação Recomendada
+
+| Situação | Modelo Primário | Modelo Fallback | Motivo |
+|----------|-----------------|-----------------|--------|
+| Tarefa simples | Free leve | Outra free | Custo zero |
+| Tarefa média | GPT-4o-mini | Free médio | Equilíbrio |
+| Tarefa complexa | Claude-3.5 | GPT-4o-mini | Qualidade máxima |
+| Orçamento esgotado | Free | Outra free | Evitar custo |
+| Disponibilidade | GPT-4o-mini | Claude-3.5 | Fallback automático |
+
+> Adicione novos exemplos conforme você testa diferentes cenários de rotat
