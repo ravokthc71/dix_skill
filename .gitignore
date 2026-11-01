@@ -1,25 +1,21 @@
-# --- OpenCode / IA ---
-.opencode/
-*.opencode.json
-.env
-.env.local
-.env.*.local
+# --- Python / DIIX ---
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+.diix/
+core/STANDARDS.md  # placeholder, não salvar state
 
-# --- Dependências / build ---
-node_modules/
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# --- Sistema operacional (Windows) ---
+# --- Windows ---
 Thumbs.db
 ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 *.lnk
 
-# --- IDEs e editores ---
+# --- IDEs ---
 .vscode/
 .idea/
 *.swp
