@@ -1,0 +1,17 @@
+openrouter:
+  base_url: "https://openrouter.ai/api/v1"
+  api_key_env: OPENROUTER_API_KEY
+
+models:
+  free:
+    - id: "meta-llama/llama-3.1-8b-instruct:free"
+      use: "tarefas_simples"
+  paid:
+    - id: "openai/gpt-4o-mini"
+      use: "tarefas_medias"
+    - id: "anthropic/claude-3.5-sonnet"
+      use: "tarefas_complexas"
+
+limits:
+  max_tokens_per_request: 2000
+  daily_free_requests: 50
