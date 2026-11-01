@@ -18,11 +18,11 @@ $envInfo = @{
     python = (python --version 2>&1) -replace '.*\s+', ''
     powershell = $PSVersionTable.PSVersion.ToString()
     cofre = Test-Path "C:\DIxavado"
-    opencode = (Get-Command opencode -ErrorAction SilentlyContinue) ? 'OK' : 'MISSING'
-    openrouter_key = [bool]$env:OPENROUTER_API_KEY
-    nine_router = (Test-Path "C:\DIX_MU\repos\openmu") ? 'PRESENT' : 'ABSENT'
-    git = (git --version 2>&1) ? 'OK' : 'MISSING'
-    node = (node --version 2>&1) ? 'OK' : 'MISSING'
+    opencode = if (Get-Command opencode -ErrorAction SilentlyContinue) { 'OK' } else { 'MISSING' }
+    openrouter_key = if ([bool]$env:OPENROUTER_API_KEY) { 'PRESENT' } else { 'ABSENT' }
+    nine_router = if (Test-Path "C:\DIX_MU\repos\openmu") { 'PRESENT' } else { 'ABSENT' }
+    git = if (git --version 2>&1) { 'OK' } else { 'MISSING' }
+    node = if (node --version 2>&1) { 'OK' } else { 'MISSING' }
 }
 
 Write-Host "=== DIIX SYSTEM CONTROLLER ===" -ForegroundColor Cyan
@@ -50,7 +50,7 @@ if ($Mode -eq "control") {
     Write-Host "Controle do sistema ativado."
     if ($Provider -eq "9router") {
         Write-Host "Configurando roteamento via 9Router (localhost:20128)..."
-        $env:OPENROUTER_API_KEY = $env:DIXX_9ROUTER_API_KEY ?? $env:OPENROUTER_API_KEY
+        $env:OPENROUTER_API_KEY = if ($env:DIXX_9ROUTER_API_KEY) { $env:DIXX_9ROUTER_API_KEY } else { $env:OPENROUTER_API_KEY }
     }
     Write-Host "Perfil selecionado: $Profile"
 }
@@ -72,7 +72,7 @@ if ($LearnMode -or $Mode -eq "learn") {
         actions = @()
     }
     # Salvar log para evolução
-    $logDir = "C:\Users\$envInfo.user\.diix\logs"
+    $logDir = "C:\Users\$env:USERNAME\.diix\logs"
     if (-not (Test-Path $logDir)) { New-Item -ItemType Directory -Path $logDir -Force | Out-Null }
     $log | ConvertTo-Json -Depth 3 | Out-File -FilePath (Join-Path $logDir "learn-$(Get-Date -Format 'yyyyMMdd-HHmmss').json") -Encoding utf8
     Write-Host "Log de aprendizado salvo em $logDir"
